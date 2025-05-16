@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-semibold">Mi Red Social Simple</h1>
+            <div>
+                <a href="/profile.html" class="text-blue-500 hover:underline mr-4">Perfil</a>
+                <button id="logoutBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8">
+        <div class="mb-4">
+            <button id="addPostBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <span class="text-xl">+</span> Nuevo Post
+            </button>
+        </div>
+
+        <div id="newPostModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Crear Nuevo Post</h3>
+                        <div class="mt-2">
+                            <label for="postImage" class="block text-gray-700 text-sm font-bold mb-2">URL de la Imagen:</label>
+                            <input type="url" id="postImage" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2">
+                            <button id="submitPostBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Publicar</button>
+                            <button id="cancelPostBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="postsContainer" class="mt-6 space-y-4">
+            </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (!loggedInUser) {
+                window.location.href = '/index.html'; // Redirigir si no hay usuario logueado
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('loggedInUser');
+                window.location.href = '/index.html';
+            });
+
+            const addPostBtn = document.getElementById('addPostBtn');
+            const newPostModal = document.getElementById('newPostModal');
+            const cancelPostBtn = document.getElementById('cancelPostBtn');
+            const submitPostBtn = document.getElementById('submitPostBtn');
+            const postsContainer = document.getElementById('postsContainer');
+            const postImageInput = document.getElementById('postImage');
+
+            addPostBtn.addEventListener('click', function() {
+                newPostModal.classList.remove('hidden');
+            });
+
+            cancelPostBtn.addEventListener('click', function() {
+                newPostModal.classList.add('hidden');
+                postImageInput.value = ''; // Limpiar el input al cancelar
+            });
+
+            submitPostBtn.addEventListener('click', function() {
+                const imageUrl = postImageInput.value.trim();
+                if (imageUrl) {
+                    addPostToContainer(loggedInUser, imageUrl);
+                    newPostModal.classList.add('hidden');
+                    postImageInput.value = ''; // Limpiar el input después de publicar
+                } else {
+                    alert('Por favor, ingresa la URL de una imagen.');
+                }
+            });
+
+            function addPostToContainer(username, imageUrl) {
+                const postDiv = document.createElement('div');
+                postDiv.classList.add('bg-white', 'rounded-md', 'shadow-sm', 'p-4');
+                postDiv.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <span class="font-semibold">${username}</span>
+                    </div>
+                    <img src="${imageUrl}" alt="Post Image" class="w-full rounded-md mb-2">
+                    <div class="mt-2">
+                        <h3 class="text-lg font-semibold mb-1">Comentarios</h3>
+                        <div class="comments-section">
+                            </div>
+                        <div class="mt-2">
+                            <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline comment-input" placeholder="Escribe un comentario...">
+                            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2 comment-button">Comentar</button>
+                        </div>
+                    </div>
+                `;
+                postsContainer.prepend(postDiv); // Agregar el nuevo post al principio
+
+                // Event listener para el botón de comentar del post recién agregado
+                const commentButton = postDiv.querySelector('.comment-button');
+                const commentInput = postDiv.querySelector('.comment-input');
+                const commentsSection = postDiv.querySelector('.comments-section');
+
+                commentButton.addEventListener('click', function() {
+                    const commentText = commentInput.value.trim();
+                    if (commentText) {
+                        const commentDiv = document.createElement('div');
+                        commentDiv.classList.add('bg-gray-100', 'rounded-md', 'p-2', 'mb-1');
+                        commentDiv.textContent = `${loggedInUser}: ${commentText}`;
+                        commentsSection.appendChild(commentDiv);
+                        commentInput.value = ''; // Limpiar el input de comentario
+                    }
+                });
+            }
+
+            // Simulación de carga de posts iniciales (puedes agregar más aquí)
+            addPostToContainer('UsuarioEjemplo1', 'https://via.placeholder.com/300/0000FF/808080?Text=Post+1');
+            addPostToContainer('UsuarioEjemplo2', 'https://via.placeholder.com/300/FF0000');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen">
+    <nav class="bg-white shadow py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-semibold">Mi Perfil</h1>
+            <a href="/mainpage.html" class="text-blue-500 hover:underline">Volver a la Página Principal</a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
+        <h2 class="text-2xl font-semibold mb-4">Información del Usuario</h2>
+        <div id="profileInfo">
+            <p><strong>Usuario:</strong> <span id="profileUsername"></span></p>
+            <p><strong>Correo Electrónico:</strong> (Información simulada)</p>
+            <p><strong>Otros detalles:</strong> (Puedes agregar más campos aquí)</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (!loggedInUser) {
+                window.location.href = '/index.html'; // Redirigir si no hay usuario logueado
+            } else {
+                document.getElementById('profileUsername').textContent = loggedInUser;
+            }
+        });
+    </script>
+</body>
+</html>
